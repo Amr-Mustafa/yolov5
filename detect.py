@@ -105,6 +105,7 @@ def run(
     vid_path, vid_writer = [None] * bs, [None] * bs
 
     # Run inference
+    preds = []
     model.warmup(imgsz=(1 if pt else bs, 3, *imgsz))  # warmup
     dt, seen = [0.0, 0.0, 0.0], 0
     for path, im, im0s, vid_cap, s in dataset:
@@ -157,6 +158,16 @@ def run(
 
                 # Write results
                 for *xyxy, conf, cls in reversed(det):
+                    
+                    height, width, _ = im0.shape
+                    frame_center = np.array([height // 2, width // 2])
+                    
+                    xmin, ymin, xmax, ymax = list(map(lambda x: x.cpu().item(), xyxy))
+                    box_center = np.array([ymin + (ymax - ymin) // 2, xmin + (xmax - xmin) // 2])
+                    
+                    if (abs(frame_center[1] - box_center[1]) < 25) and not (ymax < width - 100 and ymin > 150):
+                        preds.append(det)
+
                     if save_txt:  # Write to file
                         xywh = (xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist()  # normalized xywh
                         line = (cls, *xywh, conf) if save_conf else (cls, *xywh)  # label format
@@ -206,6 +217,8 @@ def run(
         LOGGER.info(f"Results saved to {colorstr('bold', save_dir)}{s}")
     if update:
         strip_optimizer(weights)  # update model (to fix SourceChangeWarning)
+        
+    return preds
 
 
 def parse_opt():
