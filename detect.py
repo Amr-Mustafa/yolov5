@@ -166,8 +166,11 @@ def run(
                     xmin, ymin, xmax, ymax = list(map(lambda x: x.cpu().item(), xyxy))
                     box_center = np.array([ymin + (ymax - ymin) // 2, xmin + (xmax - xmin) // 2])
                     
-                    if (abs(frame_center[1] - box_center[1]) < 25) and not (ymax < width - 100 and ymin > 150):
-                        preds.append(det)
+                    
+                    if (abs(frame_center[1] - box_center[1]) < 25) and abs(ymax - height) < 150:
+                        # print(abs(frame_center[1] - box_center[1]), abs(ymax - height))
+                        # print(det)
+                        preds.append(xyxy)
 
                     if save_txt:  # Write to file
                         xywh = (xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist()  # normalized xywh
@@ -208,14 +211,14 @@ def run(
                     vid_writer[i].write(im0)
 
         # Print time (inference-only)
-        LOGGER.info(f'{s}Done. ({t3 - t2:.3f}s)')
+        # LOGGER.info(f'{s}Done. ({t3 - t2:.3f}s)')
 
     # Print results
     t = tuple(x / seen * 1E3 for x in dt)  # speeds per image
-    LOGGER.info(f'Speed: %.1fms pre-process, %.1fms inference, %.1fms NMS per image at shape {(1, 3, *imgsz)}' % t)
+    # LOGGER.info(f'Speed: %.1fms pre-process, %.1fms inference, %.1fms NMS per image at shape {(1, 3, *imgsz)}' % t)
     if save_txt or save_img:
         s = f"\n{len(list(save_dir.glob('labels/*.txt')))} labels saved to {save_dir / 'labels'}" if save_txt else ''
-        LOGGER.info(f"Results saved to {colorstr('bold', save_dir)}{s}")
+        # LOGGER.info(f"Results saved to {colorstr('bold', save_dir)}{s}")
     if update:
         strip_optimizer(weights)  # update model (to fix SourceChangeWarning)
         
