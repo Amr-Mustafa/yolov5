@@ -158,17 +158,17 @@ def run(
                 # Write results
                 for *xyxy, conf, cls in reversed(det):
                     
-                    height, width, _ = im0.shape
-                    frame_center = np.array([height // 2, width // 2])
+#                     height, width, _ = im0.shape
+#                     frame_center = np.array([height // 2, width // 2])
                     
-                    xmin, ymin, xmax, ymax = list(map(lambda x: x.cpu().item(), xyxy))
-                    box_center = np.array([ymin + (ymax - ymin) // 2, xmin + (xmax - xmin) // 2])
+#                     xmin, ymin, xmax, ymax = list(map(lambda x: x.cpu().item(), xyxy))
+#                     box_center = np.array([ymin + (ymax - ymin) // 2, xmin + (xmax - xmin) // 2])
                     
                     
-                    if (abs(frame_center[1] - box_center[1]) < 25) and abs(ymax - height) < 150:
-                        # print(abs(frame_center[1] - box_center[1]), abs(ymax - height))
-                        # print(det)
-                        preds.append(xyxy)
+#                     if (abs(frame_center[1] - box_center[1]) < 25) and abs(ymax - height) < 150:
+#                         # print(abs(frame_center[1] - box_center[1]), abs(ymax - height))
+#                         # print(det)
+                    preds.append(xyxy)
 
                     if save_txt:  # Write to file
                         xywh = (xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist()  # normalized xywh
